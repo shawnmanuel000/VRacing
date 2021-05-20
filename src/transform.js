@@ -44,8 +44,6 @@ var MVPmat = function(state)
 		this.viewMat.copy(computeViewTransform(state));
 	};
 
-	this.computeModelTransform = computeModelTransform;
-	this.computeViewTransform = computeViewTransform;
 	this.update = update;
 };
 

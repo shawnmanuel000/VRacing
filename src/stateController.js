@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 
-
 var StateController = function ()
 {
 	var _this = this;
@@ -40,17 +39,13 @@ var StateController = function ()
 	}
 
 	document.addEventListener("mousemove", onMove);
-	function onMove(e, x, y)
+	function onMove(e)
 	{
-		var x = e.pageX
-		var y = e.pageY
-		var movement = new THREE.Vector2(x - previousPosition.x, previousPosition.y - y);
-		previousPosition.set(x, y);
+		var movement = new THREE.Vector2(e.pageX - previousPosition.x, previousPosition.y - e.pageY);
+		previousPosition.set(e.pageX, e.pageY);
 		_this.state.yaw += movement.x * 0.1
 		_this.state.pitch -= movement.y * 0.1
 	}
-
-	this.onMove = onMove;
 };
 
 export { StateController }

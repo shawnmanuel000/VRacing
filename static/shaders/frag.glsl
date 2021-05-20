@@ -62,6 +62,5 @@ void main(){
 	vec4 tex = texture2D(map, vert_uv);
 
 	gl_FragColor = vec4(fColor, 1.0) + tex;
-	// gl_FragColor = tex;
 
 }

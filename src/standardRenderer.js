@@ -3,6 +3,8 @@ import { SkySphere, Tile } from "./utils.js"
 import vertexShader from "../static/shaders/vert.glsl"
 import fragmentShader from "../static/shaders/frag.glsl"
 
+const grassColor = new THREE.Vector3(90/500,160/255,90/255)
+
 var StandardRenderer = function (webglRenderer)
 {
 	const _this = this;
@@ -11,11 +13,14 @@ var StandardRenderer = function (webglRenderer)
 	
 	const texture_loader = new THREE.TextureLoader();
 	const sky_tex = texture_loader.load("/textures/sky.png")
+	const grass_tex = texture_loader.load("/textures/grassy.png")
+	grass_tex.wrapS = THREE.RepeatWrapping
+	grass_tex.wrapT = THREE.RepeatWrapping
 	
 	const axisObject = new THREE.AxesHelper(100);
 	const pointLights = [{position: new THREE.Vector3(0, 0, 100), color: new THREE.Color(0xff00ff)}]
 	const grid = new THREE.GridHelper(1000, 20, 0x999999, 0x999999);
-	const grass = new Tile(-100,-100,100,-100,-100,100,100,100, new THREE.Vector3(90/500,160/255,90/255));
+	const grass = new Tile(-100,-100,100,-100,-100,100,100,100, new THREE.Vector3(), new THREE.Vector4(0,75,0,75), grass_tex);
 	const sky = new SkySphere(new THREE.Vector3(0, 0, 0), sky_tex);
 	const objs = [sky, grass];
 	

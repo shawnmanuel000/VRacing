@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { Vector2, Vector3 } from 'three';
 
 var SkySphere = function(position, texture)
 {
@@ -14,7 +15,7 @@ var SkySphere = function(position, texture)
 	this.texture = texture
 };
 
-var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, color, tex=new THREE.Vector4(0,1,0,1))
+var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, color, tex=new THREE.Vector4(0,1,0,1), texture=null)
 {
 	const vertices = new Float32Array([
 		xl1, 0.0, -yl1,
@@ -46,12 +47,12 @@ var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, color, tex=new THREE
 	this.position = new THREE.Vector3();
 	this.material = {
 		ambient: color,
-		diffuse: color,
+		diffuse: new Vector3(),
 		specular: new THREE.Vector3(0.0, 0.0, 0.0),
 		shininess: 1.0,
 	};
 	this.ambientLightColor = new THREE.Vector3(1.0, 1.0, 1.0);
-	this.texture = null
+	this.texture = texture
 
 };
 
