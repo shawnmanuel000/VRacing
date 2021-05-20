@@ -4,7 +4,7 @@ const MiniCSSExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
 
 module.exports = {
-    entry: path.resolve(__dirname, '../src/script.js'),
+    entry: path.resolve(__dirname, '../main.js'),
     output:
     {
         filename: 'bundle.[contenthash].js',
@@ -15,7 +15,7 @@ module.exports = {
     [
         new CopyWebpackPlugin({
             patterns: [
-                { from: path.resolve(__dirname, '../static') }
+                { from: path.resolve(__dirname, '../src/assets') }
             ]
         }),
         new HtmlWebpackPlugin({
@@ -87,6 +87,16 @@ module.exports = {
             // Shaders
             {
                 test: /\.glsl/,
+                exclude: /node_modules/,
+                use:
+                [
+                    "raw-loader"
+                ]
+            },
+
+            // Text
+            {
+                test: /\.(txt|csv)/,
                 exclude: /node_modules/,
                 use:
                 [
