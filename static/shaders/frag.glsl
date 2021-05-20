@@ -13,14 +13,15 @@ struct PointLight {
 	vec3 color;
 };
 
+uniform sampler2D map; 
 uniform mat4 viewMat;
-uniform vec3 attenuation;
 uniform vec3 ambientLightColor;
 uniform Material material;
 uniform PointLight pointLights[1];
 
-varying vec3 normalCam; // Normal in view coordinate
-varying vec3 fragPosCam; // Fragment position in view cooridnate
+varying vec3 normalCam;
+varying vec3 fragPosCam;
+varying vec2 vert_uv;
 
 vec3 calculateDiffuse(Material material, vec3 vs_position, vec3 vs_normal, PointLight light)
 {
@@ -42,17 +43,6 @@ vec3 calculateSpecular(Material material, vec3 vs_position, vec3 vs_normal, Poin
 	return specularFinal;
 }
 
-vec3 calculateAttenuation(PointLight light, vec3 vs_position, vec3 attenuation)
-{
-	vec3 vs_lightpos = vec3(viewMat * vec4(light.position, 1.0));
-	float d = distance(vs_lightpos, vs_position);
-	float kc = attenuation.x;
-	float kl = attenuation.y;
-	float kq = attenuation.z;
-	vec3 atten = vec3(1.0 / (kc + kl*d + kq*d*d));
-	return atten;
-}
-
 void main(){
 
 	vec3 vs_normal = normalize(normalCam);
@@ -66,10 +56,12 @@ void main(){
 	{
 		vec3 diffuseReflection = calculateDiffuse(material, vs_position, vs_normal, pointLights[i]);
 		vec3 specularReflection = calculateSpecular(material, vs_position, vs_normal, pointLights[i], vs_camerapos);
-		vec3 atten = calculateAttenuation(pointLights[i], vs_position, attenuation);
-		fColor += atten * (diffuseReflection + specularReflection);
+		fColor += (diffuseReflection + specularReflection);
 	}
 
-	gl_FragColor = vec4(fColor, 1.0);
+	vec4 tex = texture2D(map, vert_uv);
+
+	gl_FragColor = vec4(fColor, 1.0) + tex;
+	// gl_FragColor = tex;
 
 }

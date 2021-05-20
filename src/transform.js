@@ -1,12 +1,11 @@
 import * as THREE from 'three'
 
-var MVPmat = function(dispParams)
+var MVPmat = function(state)
 {
 	var _this = this;
 	this.modelMat = new THREE.Matrix4();
 	this.viewMat = new THREE.Matrix4();
-	this.projectionMat = new THREE.Matrix4();
-	this.position = new THREE.Vector3(0,0,dispParams.distanceScreenViewer);
+	this.position = new THREE.Vector3().add(state.camPosition);
 
 	function computeModelTransform(state)
 	{

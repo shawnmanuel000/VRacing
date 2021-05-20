@@ -1,22 +1,21 @@
 import * as THREE from 'three'
 
 
-var StateController = function (dispParams)
+var StateController = function ()
 {
 	var _this = this;
 
 	this.state = 
 	{
 		camMovement: new THREE.Vector3(),
-		modelTranslation: new THREE.Vector3(10,0,0),
+		modelTranslation: new THREE.Vector3(0,0,0),
 		modelRotation: new THREE.Vector2(),
-		viewerPosition: new THREE.Vector3(0, 0, dispParams.distanceScreenViewer),
-		viewerTarget: new THREE.Vector3(),
+		camPosition: new THREE.Vector3(0, 10, 10),
 		yaw: 90,
 		pitch: 0.0
 	};
 
-	var previousPosition = new THREE.Vector2(dispParams.canvasWidth/2, dispParams.canvasHeight/2);	// A variable to store the mouse position on the previous frame.
+	var previousPosition = new THREE.Vector2(window.innerWidth/2, window.innerHeight/2);	// A variable to store the mouse position on the previous frame.
 
 	document.addEventListener("keydown", onKeyDown);
 	function onKeyDown(event)

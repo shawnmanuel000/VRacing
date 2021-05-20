@@ -1,26 +1,31 @@
 import * as THREE from 'three'
+import { SkySphere, Tile } from "./utils.js"
+import vertexShader from "../static/shaders/vert.glsl"
+import fragmentShader from "../static/shaders/frag.glsl"
 
-var StandardRenderer = function (webglRenderer, teapots, dispParams)
+var StandardRenderer = function (webglRenderer)
 {
-	var _this = this;
-	const camera = new THREE.PerspectiveCamera(75, dispParams.canvasWidth / dispParams.canvasHeight, 0.1, 10000)
-	// var camera = new THREE.Camera();
+	const _this = this;
+	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000)
 	camera.matrixAutoUpdate = false;
-	var scene = new THREE.Scene();
-	var numPointLights = 1;
-
-	var axisObject = new THREE.AxesHelper(100);
-	axisObject.position.set(0, 0, 0);
-	scene.add(axisObject);
-
-	var grid = new THREE.GridHelper(1000, 30, "white", "white");
-	grid.position.set(0, -50, 0);
+	
+	const texture_loader = new THREE.TextureLoader();
+	const sky_tex = texture_loader.load("/textures/sky.png")
+	
+	const axisObject = new THREE.AxesHelper(100);
+	const pointLights = [{position: new THREE.Vector3(0, 0, 100), color: new THREE.Color(0xff00ff)}]
+	const grid = new THREE.GridHelper(1000, 20, 0x999999, 0x999999);
+	const grass = new Tile(-100,-100,100,-100,-100,100,100,100, new THREE.Vector3(90/500,160/255,90/255));
+	const sky = new SkySphere(new THREE.Vector3(0, 0, 0), sky_tex);
+	const objs = [sky, grass];
+	
+	const scene = new THREE.Scene();
 	scene.add(grid);
-
-	scene.background = new THREE.Color("gray");
-
-	var meshes = [];
-	for (var i = 0; i < teapots.length; i ++)
+	scene.add(axisObject);
+	scene.background = new THREE.Color(0x111111);
+	
+	const meshes = [];
+	for (var i = 0; i < objs.length; i ++)
 	{
 		var material = new THREE.RawShaderMaterial({
 			uniforms: {
@@ -28,38 +33,30 @@ var StandardRenderer = function (webglRenderer, teapots, dispParams)
 				projectionMat: { value: new THREE.Matrix4()},
 				modelViewMat: { value: new THREE.Matrix4()},
 				normalMat: { value: new THREE.Matrix3()},
-				material: { value: {
-					ambient: new THREE.Vector3(0.3, 0.3, 0.3),
-					diffuse: new THREE.Vector3(1.0, 1.0, 1.0),
-					specular: new THREE.Vector3(1.0, 1.0, 1.0),
-					shininess: 120.0,
-				}, },
-				pointLights: { value: [{
-					position: new THREE.Vector3(0, 20, 30),
-					color: new THREE.Color(0xff00ff),
-				}], properties: { position: new THREE.Vector3(), color: new THREE.Color() } },
-				ambientLightColor: { value: new THREE.Vector3(0.6, 0.4, 0.8)},
-				attenuation: { value: new THREE.Vector3(2.0, 0.0, 0.001)},
+				pointLights: { value: pointLights },
+				material: { value: objs[i].material },
+				ambientLightColor: { value: objs[i].ambientLightColor },
+				map: { value: objs[i].texture },
 			},
-			vertexShader: teapots[i].vertexShader,
-			fragmentShader: teapots[i].fragmentShader,
+			vertexShader: vertexShader,
+			fragmentShader: fragmentShader,
 			side: THREE.DoubleSide,
 			shadowSide: THREE.DoubleSide,
 		});
 
-		var mesh = new THREE.Mesh(teapots[i].geometry, material);
+		const mesh = new THREE.Mesh(objs[i].geometry, material);
 		meshes.push(mesh);
 		scene.add(mesh);
 	}
 
-	function updateUniforms(state, modelMat, viewMat, projectionMat)
+	function updateUniforms(modelMat, viewMat)
 	{
-		for (var i = 0; i < teapots.length; i ++)
+		for (var i = 0; i < objs.length; i ++)
 		{
-			var positionTranslation = new THREE.Matrix4().makeTranslation(teapots[i].position.x, teapots[i].position.y, teapots[i].position.z);
-			var _modelMat = new THREE.Matrix4().multiplyMatrices(positionTranslation, modelMat);
-			var modelViewMat = new THREE.Matrix4().multiplyMatrices(viewMat, _modelMat);
-			var normalMat = new THREE.Matrix3().getNormalMatrix(modelViewMat);
+			const positionTranslation = new THREE.Matrix4().makeTranslation(objs[i].position.x, objs[i].position.y, objs[i].position.z);
+			const _modelMat = new THREE.Matrix4().multiplyMatrices(positionTranslation, modelMat);
+			const modelViewMat = new THREE.Matrix4().multiplyMatrices(viewMat, _modelMat);
+			const normalMat = new THREE.Matrix3().getNormalMatrix(modelViewMat);
 
 			meshes[i].material.uniforms.viewMat.value = viewMat;
 			meshes[i].material.uniforms.modelViewMat.value = modelViewMat;
@@ -70,15 +67,17 @@ var StandardRenderer = function (webglRenderer, teapots, dispParams)
 		camera.matrixWorld.copy(viewMat).invert();
 	}
 
-	function render(state, modelMat, viewMat, projectionMat)
+	function render(modelMat, viewMat)
 	{
-		updateUniforms(state, modelMat, viewMat, projectionMat);
+		updateUniforms(modelMat, viewMat);
 		webglRenderer.render(scene, camera);
 	}
 
 	window.addEventListener("resize", function ()
 	{
-		webglRenderer.setSize(dispParams.canvasWidth, dispParams.canvasHeight);
+		camera.aspect = window.innerWidth / window.innerHeight
+		camera.updateProjectionMatrix()
+		webglRenderer.setSize(window.innerWidth, window.innerHeight);
 	});
 
 	this.updateUniforms = updateUniforms;
