@@ -5,6 +5,7 @@ var SkySphere = function(position, texture, scale)
 {
 	this.geometry = new THREE.SphereBufferGeometry(scale, 100, 100);
 	this.position = position;
+	this.rotation = new THREE.Vector3();
 	this.material = {
 		ambient: new THREE.Vector3(0.0, 0.0, 0.0),
 		diffuse: new THREE.Vector3(0.0, 0.0, 0.0),
@@ -45,6 +46,7 @@ var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, z, color, tex=new TH
 	this.geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 	this.geometry.setIndex(indices);
 	this.position = new THREE.Vector3();
+	this.rotation = new THREE.Vector3();
 	this.material = {
 		ambient: color,
 		diffuse: new Vector3(),
@@ -100,6 +102,7 @@ var TrackPlane = function(boundaries, color=new THREE.Vector3(), texture=null)
 	this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
 	this.geometry.setIndex(indices);
 	this.position = new THREE.Vector3();
+	this.rotation = new THREE.Vector3();
 	this.material = {
 		ambient: color,
 		diffuse: new Vector3(),

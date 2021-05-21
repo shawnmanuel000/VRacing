@@ -28,16 +28,9 @@ function compute_boundaries(points, width)
 	const right_boundary = nj.zeros(shape)
 	let first = points.slice([0,1],null) 
 	let second = points.slice([1,2],null)
-	console.log(points.slice([0,1],null).tolist())
 	let grad = second.subtract(first)
-	let gradnorm = Math.sqrt(grad.pow(2).sum())
-	let normal = nj.array([[-grad.get(0,1),grad.get(0,0)]]).divide(gradnorm)
-	let left = first.add(normal.multiply(width))
-	let right = first.subtract(normal.multiply(width))
-	left_boundary.slice([0,1],null).assign(left, false)
-	right_boundary.slice([0,1],null).assign(right, false)
-	let newgrad, avggrad
-	for (let i = 1; i < shape[0]-1; i++) {
+	let gradnorm, normal, newgrad, avggrad, left, right
+	for (let i = 0; i < shape[0]-1; i++) {
 		first = points.slice([i,i+1],null) 
 		second = points.slice([i+1,i+2],null)
 		newgrad = second.subtract(first)
