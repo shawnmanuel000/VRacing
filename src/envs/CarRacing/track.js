@@ -1,4 +1,4 @@
-import curveTrack from "./assets/models/curve.csv"
+import curveTrack from "../../assets/models/curve.csv"
 
 class Track
 {

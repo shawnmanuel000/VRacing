@@ -1,6 +1,6 @@
 import * as THREE from "three"
-import vertexShader from "./assets/shaders/vert.glsl"
-import fragmentShader from "./assets/shaders/frag.glsl"
+import vertexShader from "../../../assets/shaders/vert.glsl"
+import fragmentShader from "../../../assets/shaders/frag.glsl"
 
 var Shader = function(pointLights)
 {
@@ -10,6 +10,9 @@ var Shader = function(pointLights)
 
 	this.getShaderMaterial = function(material, texture)
 	{
+		texture = texture !== undefined && texture.hasOwnProperty("texture") 
+			? texture.texture 
+			: texture
 		var material = new THREE.RawShaderMaterial({
 			uniforms: {
 				modelViewMat: { value: new THREE.Matrix4() },
@@ -19,7 +22,7 @@ var Shader = function(pointLights)
 				cameraPos: { value: new THREE.Vector3() },
 				pointLights: { value: this.pointLights },
 				material: { value: material },
-				map: { value: texture !== undefined && texture.hasOwnProperty("texture") ? texture.texture : texture },
+				map: { value: texture },
 			},
 			vertexShader: this.vertexShader,
 			fragmentShader: this.fragmentShader,

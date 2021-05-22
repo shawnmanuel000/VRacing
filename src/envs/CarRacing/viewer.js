@@ -1,11 +1,11 @@
 import * as THREE from "three"
 import { Track } from "./track.js"
-import { loadOBJ } from "./objLoader"
-import { SkySphere, Tile, TrackRoad, TrackPlane } from "./mesh.js"
-import { Shader } from "./shader.js"
-import { Model } from "./model.js"
-import { Camera } from "./camera.js"
-import { Texture } from "./texture.js"
+import { loadOBJ } from "./viewer/objLoader"
+import { SkySphere, Tile, TrackRoad, TrackPlane } from "./viewer/mesh.js"
+import { Shader } from "./viewer/shader.js"
+import { Model } from "./viewer/model.js"
+import { Camera } from "./viewer/camera.js"
+import { Texture } from "./viewer/texture.js"
 
 const ROAD_COLOR = new THREE.Vector3(100/255,100/255,100/255);
 const GRASS_COLOR = new THREE.Vector3(90/255,160/255,90/255)
@@ -31,6 +31,7 @@ var Viewer = function(lanes)
 	const sky = new Model(shader).loadMeshes([new SkySphere(skytex, 2000)])
 	const car = new Model(shader, new THREE.Vector3(0,0,-5), new THREE.Vector3(0,0,0), 0.8).loadOBJ("/models/supra1.obj")
 	const models = [sky, grasses, road, car]
+	const viewerAction = new THREE.Vector2()
 
 	this.render = function()
 	{
@@ -45,10 +46,33 @@ var Viewer = function(lanes)
 		webglRenderer.render(scene, camera.camera);
 	}
 
+	this.getViewerAction = function()
+	{
+		return viewerAction
+	}
+
 	window.addEventListener("resize", function ()
 	{
 		webglRenderer.setSize(window.innerWidth, window.innerHeight);
 	});
+
+	document.addEventListener("keydown", (e) => this.onKeyDown(e));
+	this.onKeyDown = function(event)
+	{
+		if ( event.which === 37 ) { viewerAction.x = -1; }
+		if ( event.which === 38 ) { viewerAction.y = 1; }
+		if ( event.which === 39 ) { viewerAction.x = 1; }
+		if ( event.which === 40 ) { viewerAction.y = -1; }
+	}
+
+	document.addEventListener("keyup", (e) => this.onKeyUp(e));
+	this.onKeyUp = function(event)
+	{
+		if ( event.which === 37 ) { viewerAction.x = 0; }
+		if ( event.which === 38 ) { viewerAction.y = 0; }
+		if ( event.which === 39 ) { viewerAction.x = 0; }
+		if ( event.which === 40 ) { viewerAction.y = 0; }
+	}
 
 };
 
