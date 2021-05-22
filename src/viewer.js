@@ -1,14 +1,13 @@
-import * as THREE from 'three'
+import * as THREE from "three"
 import { Track } from "./track.js"
 import { loadOBJ } from "./objLoader"
-import { SkySphere, Tile, TrackPlane, Mesh } from "./utils.js"
-import vertexShader from "./assets/shaders/vert.glsl"
-import fragmentShader from "./assets/shaders/frag.glsl"
+import { SkySphere, Tile, TrackPlane, Mesh } from "./mesh.js"
+import { Shader } from "./shader.js"
 
 const ROAD_COLOR = new THREE.Vector3(100/255,100/255,100/255);
 const GRASS_COLOR = new THREE.Vector3(90/255,160/255,90/255)
 const NO_COLOR = new THREE.Vector3()
-const canvas = document.querySelector('canvas.webgl')
+const canvas = document.querySelector("canvas.webgl")
 
 var Viewer = function ()
 {
@@ -18,6 +17,8 @@ var Viewer = function ()
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000)
 	camera.matrixAutoUpdate = false;
 	camera.position.set(0, 10, 10)
+
+	const shader = new Shader();
 	
 	const texture_loader = new THREE.TextureLoader();
 	const sky_tex = texture_loader.load("/textures/sky.png")
@@ -30,24 +31,7 @@ var Viewer = function ()
 
 	function addMesh(obj)
 	{
-		var material = new THREE.RawShaderMaterial({
-			uniforms: {
-				viewMat: { value: new THREE.Matrix4() },
-				projectionMat: { value: new THREE.Matrix4() },
-				modelViewMat: { value: new THREE.Matrix4() },
-				normalMat: { value: new THREE.Matrix3() },
-				cameraPos: { value: new THREE.Vector3() },
-				pointLights: { value: pointLights },
-				material: { value: obj.material },
-				map: { value: obj.texture },
-			},
-			vertexShader: vertexShader,
-			fragmentShader: fragmentShader,
-			side: THREE.DoubleSide,
-			transparent: true
-		});
-	
-		const mesh = new THREE.Mesh(obj.geometry, material);
+		const mesh = new THREE.Mesh(obj.geometry, shader.getShaderMaterial(obj.material, obj.texture));
 		mesh.renderOrder = 1 - obj.material.d
 		meshes.push(mesh);
 		scene.add(mesh);
@@ -55,7 +39,7 @@ var Viewer = function ()
 	
 	const scene = new THREE.Scene();
 	const meshes = [];
-	const pointLights = [{position: new THREE.Vector3(0, 0, 100), color: new THREE.Color(0xff00ff)}]
+	const pointLights = [{position: new THREE.Vector3(0, 0, 100), color: new THREE.Color(0xffffff)}]
 	const grass = new Tile(-542,-760,797,-760,-542,745,797,745,-1, NO_COLOR, new THREE.Vector4(0,75,0,75), grass_tex);
 	const sky = new SkySphere(new THREE.Vector3(0, 0, 0), sky_tex, 2000);
 	const track = new Track()
@@ -88,6 +72,7 @@ var Viewer = function ()
 			meshes[i].material.uniforms.normalMat.value = normalMat;
 			meshes[i].material.uniforms.projectionMat.value = projectionMatrix;
 			meshes[i].material.uniforms.cameraPos.value = cameraPos;
+			meshes[i].material.uniforms.pointLights.value = pointLights;
 		}
 		camera.matrixWorld.copy(viewMat).invert();
 	}

@@ -1,23 +1,21 @@
-import * as THREE from 'three'
-import { Vector2, Vector3 } from 'three';
+import * as THREE from "three"
+import { Material } from "./material.js"
 
-var Material = function(name="default", Ka=new THREE.Vector3(), Kd=new THREE.Vector3(), Ns=35.0)
+var Mesh = function(geometry, material, position, rotation, texture)
 {
-	this.name = name
-	this.Ka = Ka
-	this.Kd = Kd
-	this.Ks = new THREE.Vector3()
-	this.Ns = Ns
-	this.d = 1.0
-	this.illum = 1
+	this.geometry = geometry
+	this.position = position !== undefined ? position : new THREE.Vector3()
+	this.rotation = rotation !== undefined ? rotation : new THREE.Vector3()
+	this.material = material
+	this.texture = texture
 }
 
 function getGeometry(positions, normals, uvs, indices=null)
 {
 	const geometry = new THREE.BufferGeometry();
-	geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-	geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
-	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+	geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
+	geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+	geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));
 	if (indices !== null) geometry.setIndex(indices);
 	return geometry
 }
@@ -106,15 +104,6 @@ var TrackPlane = function(boundaries, color=new THREE.Vector3(), texture=null)
 	this.rotation = new THREE.Vector3();
 	this.material = new Material("TrackPlane", color)
 	this.texture = texture
-}
-
-var Mesh = function(geometry, material, position=new THREE.Vector3(), rotation=new THREE.Vector3(), tex=null)
-{
-	this.geometry = geometry
-	this.position = position
-	this.rotation = rotation
-	this.material = material
-	this.texture = tex
 }
 
 export { SkySphere, Tile, TrackPlane, Material, getGeometry, Mesh }

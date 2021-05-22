@@ -1,4 +1,4 @@
-import './src/assets/style.css'
+import "./src/assets/style.css"
 import { Viewer } from "./src/viewer.js"
 
 const viewer = new Viewer();

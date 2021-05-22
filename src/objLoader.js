@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { Material, getGeometry } from "./utils.js"
+import { getGeometry } from "./mesh.js"
+import { Material } from "./material.js"
 
 function tokenize(text)
 {
