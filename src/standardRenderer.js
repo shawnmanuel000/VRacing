@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { Track } from "./track.js"
-import { SkySphere, Tile, TrackPlane } from "./utils.js"
+import { loadOBJ } from "./objLoader"
+import { SkySphere, Tile, TrackPlane, Mesh } from "./utils.js"
 import vertexShader from "./assets/shaders/vert.glsl"
 import fragmentShader from "./assets/shaders/frag.glsl"
 
@@ -11,7 +12,7 @@ const canvas = document.querySelector('canvas.webgl')
 
 var Viewer = function ()
 {
-	const webglRenderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, stencil: false, depth: true});
+	const webglRenderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, stencil: false, alpha: true});
 	webglRenderer.setSize(window.innerWidth, window.innerHeight);
 
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000)
@@ -26,47 +27,58 @@ var Viewer = function ()
 	grass_tex.wrapT = THREE.RepeatWrapping
 	road_tex.wrapS = THREE.RepeatWrapping
 	road_tex.wrapT = THREE.RepeatWrapping
+
+	function addMesh(obj)
+	{
+		var material = new THREE.RawShaderMaterial({
+			uniforms: {
+				viewMat: { value: new THREE.Matrix4() },
+				projectionMat: { value: new THREE.Matrix4() },
+				modelViewMat: { value: new THREE.Matrix4() },
+				normalMat: { value: new THREE.Matrix3() },
+				cameraPos: { value: new THREE.Vector3() },
+				pointLights: { value: pointLights },
+				material: { value: obj.material },
+				map: { value: obj.texture },
+			},
+			vertexShader: vertexShader,
+			fragmentShader: fragmentShader,
+			side: THREE.DoubleSide,
+			transparent: true
+		});
 	
+		const mesh = new THREE.Mesh(obj.geometry, material);
+		meshes.push(mesh);
+		scene.add(mesh);
+	}
+	
+	const scene = new THREE.Scene();
+	const meshes = [];
 	const pointLights = [{position: new THREE.Vector3(0, 0, 100), color: new THREE.Color(0xff00ff)}]
 	const grass = new Tile(-542,-760,797,-760,-542,745,797,745,-1, NO_COLOR, new THREE.Vector4(0,75,0,75), grass_tex);
 	const sky = new SkySphere(new THREE.Vector3(0, 0, 0), sky_tex, 2000);
 	const track = new Track()
 	const trackplane = new TrackPlane(track.boundaries, NO_COLOR, road_tex)
+	const car = loadOBJ("/models/supra1.obj", (loads) => 
+	{
+		for (const obj of loads) 
+		{
+			var mesh = new Mesh(obj.geometry, obj.material)
+			addMesh(mesh)
+		}
+	})
 	const objs = [sky, grass, trackplane];
 	
-	const scene = new THREE.Scene();
-	scene.background = new THREE.Color(0x111111);
-	
-	const meshes = [];
 	for (var i = 0; i < objs.length; i ++)
 	{
-		var material = new THREE.RawShaderMaterial({
-			uniforms: {
-				viewMat: { value: new THREE.Matrix4()},
-				projectionMat: { value: new THREE.Matrix4()},
-				modelViewMat: { value: new THREE.Matrix4()},
-				normalMat: { value: new THREE.Matrix3()},
-				pointLights: { value: pointLights },
-				material: { value: objs[i].material },
-				ambientLightColor: { value: objs[i].ambientLightColor },
-				map: { value: objs[i].texture },
-			},
-			vertexShader: vertexShader,
-			fragmentShader: fragmentShader,
-			side: THREE.DoubleSide,
-			shadowSide: THREE.DoubleSide,
-		});
-
-		const mesh = new THREE.Mesh(objs[i].geometry, material);
-		meshes.push(mesh);
-		scene.add(mesh);
+		addMesh(objs[i])
 	}
 
-	function updateUniforms(viewMat)
+	function updateUniforms(viewMat, projectionMatrix, cameraPos)
 	{
-		for (var i = 0; i < objs.length; i ++)
+		for (var i = 0; i < meshes.length; i ++)
 		{
-			const modelMat = computeModelTransform(objs[i].position, objs[i].rotation)
+			const modelMat = computeModelTransform(meshes[i].position, meshes[i].rotation)
 			// const positionTranslation = new THREE.Matrix4().makeTranslation(objs[i].position.x, objs[i].position.y, objs[i].position.z);
 			// const _modelMat = new THREE.Matrix4().multiplyMatrices(positionTranslation, modelMat);
 			const modelViewMat = new THREE.Matrix4().multiplyMatrices(viewMat, modelMat);
@@ -75,7 +87,8 @@ var Viewer = function ()
 			meshes[i].material.uniforms.viewMat.value = viewMat;
 			meshes[i].material.uniforms.modelViewMat.value = modelViewMat;
 			meshes[i].material.uniforms.normalMat.value = normalMat;
-			meshes[i].material.uniforms.projectionMat.value = camera.projectionMatrix;
+			meshes[i].material.uniforms.projectionMat.value = projectionMatrix;
+			meshes[i].material.uniforms.cameraPos.value = cameraPos;
 		}
 		camera.matrixWorld.copy(viewMat).invert();
 	}
@@ -118,10 +131,12 @@ var Viewer = function ()
 
 	function render()
 	{
-		sky.rotation.y += 0.01
+		meshes[0].rotation.y += 0.01
+		// meshes[meshes.length-1].position.y += 0.01
 		let viewMat = computeViewTransform(state)
-		updateUniforms(viewMat);
+		updateUniforms(viewMat, camera.projectionMatrix, camera.position);
 		webglRenderer.render(scene, camera);
+
 	}
 
 

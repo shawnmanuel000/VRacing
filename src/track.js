@@ -12,7 +12,6 @@ class Track
 			const vals = fields.map(parseFloat)
 			points.push(vals)
 		}
-		// points.push(points[0])
 		this.trackname = "curve"
 		this.track = nj.array(points)
 		this.boundaries = compute_boundaries(this.track, 15)

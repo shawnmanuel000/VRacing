@@ -1,24 +1,39 @@
 import * as THREE from 'three'
 import { Vector2, Vector3 } from 'three';
 
+var Material = function(name="default", Ka=new THREE.Vector3(), Kd=new THREE.Vector3(), Ns=35.0)
+{
+	this.name = name
+	this.Ka = Ka
+	this.Kd = Kd
+	this.Ks = new THREE.Vector3()
+	this.Ns = Ns
+	this.d = 1.0
+	this.illum = 1
+}
+
+function getGeometry(positions, normals, uvs, indices=null)
+{
+	const geometry = new THREE.BufferGeometry();
+	geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+	geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
+	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+	if (indices !== null) geometry.setIndex(indices);
+	return geometry
+}
+
 var SkySphere = function(position, texture, scale)
 {
 	this.geometry = new THREE.SphereBufferGeometry(scale, 100, 100);
 	this.position = position;
 	this.rotation = new THREE.Vector3();
-	this.material = {
-		ambient: new THREE.Vector3(0.0, 0.0, 0.0),
-		diffuse: new THREE.Vector3(0.0, 0.0, 0.0),
-		specular: new THREE.Vector3(0.0, 0.0, 0.0),
-		shininess: 1.0,
-	};
-	this.ambientLightColor = new THREE.Vector3(0.0, 0.0, 0.0);
+	this.material = new Material()
 	this.texture = texture
 };
 
 var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, z, color, tex=new THREE.Vector4(0,1,0,1), texture=null)
 {
-	const vertices = new Float32Array([
+	const positions = new Float32Array([
 		xl1, z, -yl1,
 		xl2, z, -yl2,
 		xr1, z, -yr1,
@@ -40,20 +55,10 @@ var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, z, color, tex=new TH
 		1, 0, 2,
 		1, 2, 3
 	];
-	this.geometry = new THREE.BufferGeometry();
-	this.geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-	this.geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
-	this.geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-	this.geometry.setIndex(indices);
+	this.geometry = getGeometry(positions, normals, uvs, indices)
 	this.position = new THREE.Vector3();
 	this.rotation = new THREE.Vector3();
-	this.material = {
-		ambient: color,
-		diffuse: new Vector3(),
-		specular: new THREE.Vector3(0.0, 0.0, 0.0),
-		shininess: 1.0,
-	};
-	this.ambientLightColor = new THREE.Vector3(1.0, 1.0, 1.0);
+	this.material = new Material("Tile", color)
 	this.texture = texture
 
 };
@@ -62,7 +67,7 @@ var TrackPlane = function(boundaries, color=new THREE.Vector3(), texture=null)
 {
 	const shape = boundaries.shape
 	const indices = []
-	const vertices = []
+	const positions = []
 	const normals = []
 	const uvs = []
 	let acc_len = 0
@@ -91,26 +96,25 @@ var TrackPlane = function(boundaries, color=new THREE.Vector3(), texture=null)
 		}
 		var segment = new Tile(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, 0, color, tex);
 		segment.geometry.index.array.forEach(i => {indices.push(i+numvertices)});
-		segment.geometry.attributes.position.array.forEach(v => {vertices.push(v)});
+		segment.geometry.attributes.position.array.forEach(v => {positions.push(v)});
 		segment.geometry.attributes.normal.array.forEach(n => {normals.push(n)});
 		segment.geometry.attributes.uv.array.forEach(u => {uvs.push(u)});
 		numvertices += segment.geometry.attributes.position.count
 	}
-	this.geometry = new THREE.BufferGeometry();
-	this.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
-	this.geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
-	this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-	this.geometry.setIndex(indices);
+	this.geometry = getGeometry(positions, normals, uvs, indices)
 	this.position = new THREE.Vector3();
 	this.rotation = new THREE.Vector3();
-	this.material = {
-		ambient: color,
-		diffuse: new Vector3(),
-		specular: new THREE.Vector3(0.0, 0.0, 0.0),
-		shininess: 1.0,
-	};
-	this.ambientLightColor = new THREE.Vector3(1.0, 1.0, 1.0);
+	this.material = new Material("TrackPlane", color)
 	this.texture = texture
 }
 
-export { SkySphere, Tile, TrackPlane }
+var Mesh = function(geometry, material, position=new THREE.Vector3(), rotation=new THREE.Vector3(), tex=null)
+{
+	this.geometry = geometry
+	this.position = position
+	this.rotation = rotation
+	this.material = material
+	this.texture = tex
+}
+
+export { SkySphere, Tile, TrackPlane, Material, getGeometry, Mesh }
