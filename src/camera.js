@@ -30,10 +30,6 @@ var Camera = function(position, yaw, fov)
 		var right = new THREE.Vector3().crossVectors(upVector, front).normalize()
 		var up = new THREE.Vector3().crossVectors(front, right).normalize()
 		var rotationMat = new THREE.Matrix4().makeBasis(right, up, front).transpose();
-		// var world2Cam = new THREE.Matrix3().setFromMatrix4(rotationMat).transpose()
-		// var movement = new THREE.Vector3().add(this.movement)
-		// var directions =  this.movement.applyMatrix3(world2Cam)
-		// position.addScaledVector(directions, -1)
 		var translationMat = new THREE.Matrix4().makeTranslation(-position.x, -position.y, -position.z);
 		return new THREE.Matrix4().premultiply(translationMat).premultiply(rotationMat);
 	}
@@ -74,12 +70,9 @@ var Camera = function(position, yaw, fov)
 	{
 		var offsetX = e.pageX - this.cursorPos.x
 		var offsetY = this.cursorPos.y - e.pageY
-		// var movement = new THREE.Vector2(e.pageX - this.cursorPos.x, this.cursorPos.y - e.pageY);
 		this.cursorPos.set(e.pageX, e.pageY);
 		this.pitch = Math.min(Math.max(this.pitch - offsetY * 0.1, -80.0), 80.0)
 		this.yaw = (this.yaw + offsetX * 0.1) % 360.0
-		// this.pitch -= movement.y * 0.1
-		// this.yaw += movement.x * 0.1
 	}
 
 	window.addEventListener("resize", () => this.onResize())

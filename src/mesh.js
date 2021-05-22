@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import { Material } from "./material.js"
 
-var Mesh = function(geometry, material, position, rotation, texture)
+var Mesh = function(geometry, material, texture)
 {
 	this.geometry = geometry
 	this.material = material
@@ -23,7 +23,7 @@ var SkySphere = function(texture, scale)
 	this.geometry = new THREE.SphereBufferGeometry(scale, 100, 100);
 	this.material = new Material()
 	this.texture = texture
-};
+}
 
 var Quad = function(xll, yll, xtr, ytr, z, color, texture, uv)
 {
@@ -58,7 +58,7 @@ var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, z, color, texture, u
 	this.geometry = getGeometry(positions, normals, uvs, indices)
 	this.material = new Material("Tile", color)
 	this.texture = texture
-};
+}
 
 var TrackPlane = function(boundaries, color, texture, uv)
 {

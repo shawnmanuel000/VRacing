@@ -19,7 +19,7 @@ var Shader = function(pointLights)
 				cameraPos: { value: new THREE.Vector3() },
 				pointLights: { value: this.pointLights },
 				material: { value: material },
-				map: { value: texture },
+				map: { value: texture !== undefined && texture.hasOwnProperty("texture") ? texture.texture : texture },
 			},
 			vertexShader: this.vertexShader,
 			fragmentShader: this.fragmentShader,
