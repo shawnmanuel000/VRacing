@@ -48,6 +48,7 @@ var Viewer = function ()
 		});
 	
 		const mesh = new THREE.Mesh(obj.geometry, material);
+		mesh.renderOrder = 1 - obj.material.d
 		meshes.push(mesh);
 		scene.add(mesh);
 	}
@@ -79,8 +80,6 @@ var Viewer = function ()
 		for (var i = 0; i < meshes.length; i ++)
 		{
 			const modelMat = computeModelTransform(meshes[i].position, meshes[i].rotation)
-			// const positionTranslation = new THREE.Matrix4().makeTranslation(objs[i].position.x, objs[i].position.y, objs[i].position.z);
-			// const _modelMat = new THREE.Matrix4().multiplyMatrices(positionTranslation, modelMat);
 			const modelViewMat = new THREE.Matrix4().multiplyMatrices(viewMat, modelMat);
 			const normalMat = new THREE.Matrix3().getNormalMatrix(modelViewMat);
 
@@ -95,10 +94,11 @@ var Viewer = function ()
 
 	function computeModelTransform(modelTranslation, modelRotation)
 	{
-		var translationMat = new THREE.Matrix4().makeTranslation(modelTranslation.x, modelTranslation.y, modelTranslation.z);
-		var rotationMatX = new THREE.Matrix4().makeRotationX(modelRotation.x * THREE.Math.DEG2RAD);
-		var rotationMatY = new THREE.Matrix4().makeRotationY(modelRotation.y * THREE.Math.DEG2RAD);
-		var modelMatrix = new THREE.Matrix4().premultiply(rotationMatY).premultiply(rotationMatX).premultiply(translationMat);
+		var T = new THREE.Matrix4().makeTranslation(modelTranslation.x, modelTranslation.y, modelTranslation.z);
+		var Rx = new THREE.Matrix4().makeRotationX(modelRotation.x * THREE.Math.DEG2RAD);
+		var Ry = new THREE.Matrix4().makeRotationY(modelRotation.y * THREE.Math.DEG2RAD);
+		var Rz = new THREE.Matrix4().makeRotationZ(modelRotation.z * THREE.Math.DEG2RAD);
+		var modelMatrix = new THREE.Matrix4().premultiply(Ry).premultiply(Rx).premultiply(Rz).premultiply(T);
 		return modelMatrix;
 	}
 

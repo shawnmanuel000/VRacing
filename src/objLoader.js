@@ -209,7 +209,6 @@ function parseOBJ(src, mtl_map)
 			meshes.push({geometry, material})
 		}
 	}
-	meshes.sort((m1) => -m1.material.d)
 	return meshes
 }
 

@@ -1,5 +1,5 @@
 import './src/assets/style.css'
-import { Viewer } from "./src/standardRenderer.js"
+import { Viewer } from "./src/viewer.js"
 
 const viewer = new Viewer();
 run();
