@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { getGeometry } from "./mesh.js"
 import { Material } from "./material.js"
+import { Mesh } from "./mesh.js"
 
 function tokenize(text)
 {
@@ -207,7 +208,7 @@ function parseOBJ(src, mtl_map)
 			}
 			const geometry = getGeometry(positions, normals, uvs)
 			const material = mtl_map.get(mtl_name)
-			meshes.push({geometry, material})
+			meshes.push(new Mesh(geometry, material))
 		}
 	}
 	return meshes
