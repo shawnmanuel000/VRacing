@@ -3,7 +3,7 @@ import { clamp } from "../../utils/misc.js"
 
 const USE_DELTA = true
 const DELTA_T = 0.05
-const TURN_SCALE = 0.05
+const TURN_SCALE = 0.1
 const PEDAL_SCALE = 1.0
 const TURN_LIMIT = 0.025
 const PEDAL_LIMIT = 1.0
@@ -63,7 +63,6 @@ var TireModel = function()
 	}
 
 }
-console.log(constants)
 
 var CarDynamics = function()
 {
@@ -108,9 +107,9 @@ var CarDynamics = function()
 			let V̇x = (1/constants.m) * (2*FxF*Math.cos(δ) - 2*FyF*Math.sin(δ) + 2*FxR - F_X_Aero) + state.ψ̇ * state.Vy
 			let V̇y = (1/constants.m) * (2*FyF*Math.cos(δ) + 2*FxF*Math.sin(δ) + 2*FyR) - state.ψ̇ * state.Vx
 			
-			let ψ̇ = state.ψ̇ + ψ̈  * dt
-			let Vx = state.Vx + V̇x * dt
-			let Vy = state.Vy + V̇y * dt
+			let ψ̇ = FyScale * (state.ψ̇ + ψ̈  * dt)
+			let Vx = Math.max(state.Vx + V̇x * dt, 0)
+			let Vy = FyScale * (state.Vy + V̇y * dt)
 			let V = Math.sqrt(Vx**2 + Vy**2)
 
 			let β = Math.atan2(Vy,Vx)

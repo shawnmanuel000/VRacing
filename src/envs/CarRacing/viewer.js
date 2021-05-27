@@ -6,7 +6,7 @@ import { Shader } from "./viewer/shader.js"
 import { Model } from "./viewer/model.js"
 import { Camera } from "./viewer/camera.js"
 import { Texture } from "./viewer/texture.js"
-import { clamp } from "../../utils/misc.js"
+import { lerpAngles } from "../../utils/misc.js"
 
 const ROAD_COLOR = new THREE.Vector3(100/255,100/255,100/255);
 const GRASS_COLOR = new THREE.Vector3(90/255,160/255,90/255)
@@ -34,7 +34,7 @@ var Viewer = function(lanes)
 	// const car = new Model(shader, new THREE.Vector3(0,1,-5), new THREE.Vector3(0,0,0), 2.0).loadOBJ("/models/cube.obj")
 	const models = [sky, grasses, road, car]
 	const viewerAction = new THREE.Vector2()
-	const delta_t = 0.02
+	const delta_t = 0.05
 
 	this.render = function(state)
 	{
@@ -62,7 +62,7 @@ var Viewer = function(lanes)
 	{
 		if (!camera.follow) return
 		const pos = new THREE.Vector3(state.X, 0.0, -state.Y);
-		const yaw = (1.0-lerp)*camera.getHeading() + lerp*(180-state.ψ)
+		const yaw = lerpAngles(camera.getHeading(), (180-state.ψ), lerp)
 		const offset_dirn3 = new THREE.Vector3(0,5,20);
 		const vm = camera.computeViewMatrix()
 		const world2Cam = new THREE.Matrix3().setFromMatrix4(vm).transpose()

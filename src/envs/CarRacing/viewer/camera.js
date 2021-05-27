@@ -70,14 +70,11 @@ var Camera = function(position, yaw, fovy)
 		this.position = new THREE.Vector3().add(pos)
 		this.yaw = yaw
 		this.pitch = pitch
-		// this.camera.position.copy(pos)
-		// this.camera.rotation.y = yaw
-		// this.camera.rotation.x = pitch
 	}
 
 	this.getHeading = function()
 	{
-		return this.yaw
+		return this.yaw % 360
 	}
 
 	this.getPosition = function()
