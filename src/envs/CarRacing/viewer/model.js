@@ -23,18 +23,6 @@ var Model = function(shader, position, rotation, scale)
 		return this
 	}
 
-	// this.computeModelMatrix = function()
-	// {
-	// 	const T = new THREE.Matrix4().makeTranslation(this.position.x, this.position.y, this.position.z);
-	// 	const Rx = new THREE.Matrix4().makeRotationX(this.rotation.x * THREE.Math.DEG2RAD);
-	// 	const Ry = new THREE.Matrix4().makeRotationY(this.rotation.y * THREE.Math.DEG2RAD);
-	// 	const Rz = new THREE.Matrix4().makeRotationZ(this.rotation.z * THREE.Math.DEG2RAD);
-	// 	const R = new THREE.Matrix4().premultiply(Ry).premultiply(Rx).premultiply(Rz);
-	// 	const S = new THREE.Matrix4().makeScale(this.scale.x, this.scale.y, this.scale.z);
-	// 	const modelMatrix = new THREE.Matrix4().premultiply(S).premultiply(R).premultiply(T);
-	// 	return modelMatrix;
-	// }
-
 	this.computeModelMatrix = function()
 	{
 		const T = new THREE.Matrix4().makeTranslation(this.position.x, this.position.y, this.position.z);

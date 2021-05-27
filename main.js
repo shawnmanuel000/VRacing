@@ -8,7 +8,7 @@ const track = new Track()
 const viewer = new Viewer(track.boundaries);
 run();
 
-var state = dynamics.reset([1.54, 2.28, Math.PI/2], 10).state
+var state = dynamics.reset([1.54, 2.28, Math.PI/2], 2).state
 
 function run()
 {
