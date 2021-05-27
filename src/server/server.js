@@ -20,13 +20,8 @@
 
 // Import serialport library
 const SerialPort = require( "serialport" );
-
-// Import WebSocketServer
 const WebSocketServer = require( "ws" ).Server;
-
-// Instantiate the WebSocket server with port 8081
 const wss = new WebSocketServer( { port: 8081 } );
-
 
 // List of WebSocket connections
 // It is useful to use it as a contanair even if we assume 1 WebSocket
@@ -34,170 +29,95 @@ const wss = new WebSocketServer( { port: 8081 } );
 // we don't have any WebSocket connections.
 var wssConnections = [];
 
-
 // Toggle switch for printing out the data
 var printData = true;
 
-
 // Event listner of the WebSocketServer.
-wss.on( "connection", function ( client ) {
-
+wss.on( "connection", function ( client ) 
+{
 	console.log( "The browser is connected to the serial port." );
-
 	wssConnections.push( client );
-
-	client.on( "close", function () {
-
+	client.on( "close", function () 
+	{
 		console.log( "The connection to the browser is closed." );
-
 		var idx = wssConnections.indexOf( client );
-
 		wssConnections.splice( idx, 1 );
-
-	} );
-
+	});
 } );
-
-
 
 // Keyboard input to Arduino through stdin.
 // By setting it to be raw mode, the data is sent without hitting enter.
 var stdin = process.openStdin();
-
 stdin.setRawMode( true );
-
 stdin.setEncoding( "utf8" );
-
-stdin.on( "data", function ( key ) {
-
-	if ( key === '\u0003' ) {
-
+stdin.on( "data", function ( key ) 
+{
+	if ( key === '\u0003' ) 
+	{
 		process.exit();
-
 	}
-
 } );
 
 findSerialPort();
 
-
-
-function findSerialPort() {
-
+function findSerialPort() 
+{
 	console.log( "Looking for Teensy..." );
-
 	var connected = false;
-
-	SerialPort.list().then(
-		ports => ports.forEach(
-			function ( port ) {
-
-				if ( port.manufacturer == "Teensyduino" ||
-					port.manufacturer == "Microsoft" ) {
-
-					console.log( "Teensy found!" );
-
-					setupSerialPort( port.comName );
-
-					connected = true;
-
-				}
-
+	SerialPort.list().then(ports => 
+		ports.forEach(function ( port ) 
+		{
+			if (port.manufacturer == "Teensyduino" ||
+				port.manufacturer == "Microsoft" ) {
+				console.log( "Teensy found!" );
+				setupSerialPort( port.comName );
+				connected = true;
 			}
-		),
-		err => console.error( err )
-	).then(
-		function () {
-
+		}
+		), err => console.error( err )).then(function () 
+		{
 			if ( ! connected ) {
-
 				console.log( "Teensy not found..." );
-
 				//try to reconnect in 1 s
 				setTimeout( findSerialPort, 1000 );
-
 			}
-
-		}
-	);
-
+		});
 }
 
-function setupSerialPort( portName ) {
-
+function setupSerialPort( portName ) 
+{
 	// Instantiate SerialPort
 	const parser = new SerialPort.parsers.Readline();
-
-	const serialPort = new SerialPort( portName, {
-
-		baudRate: 115200
-
-	} );
-
+	const serialPort = new SerialPort( portName, { baudRate: 115200 } );
 	serialPort.pipe( parser );
-
 	// Set up event listeners on the serial port
-	serialPort.on( "open", function () {
-
-		console.log( "The serial port to Teensy is opened." );
-
-	} );
-
+	serialPort.on( "open", function () { console.log( "The serial port to Teensy is opened." ); });
 	serialPort.on( "close", function () {
-
 		console.log( "The serial port to Teensy is closed." );
-
-		//try to reconnect in 1 s
 		setTimeout( findSerialPort, 1000 );
-
 	} );
-
-	serialPort.on( "error", function ( err ) {
-
-		console.log( "Serial port error: " + err );
-
-	} );
+	serialPort.on( "error", function ( err ) { console.log( "Serial port error: " + err ); });
 
 	// transmit serial port data though the web socket server
-	parser.on( "data", function ( data ) {
-
-		if ( printData ) {
-
-			console.log( data );
-
-		}
-
-		wssConnections.forEach( function ( socket ) {
-
-			socket.send( data, function ( err ) { } );
-
-		} );
-
+	parser.on( "data", function ( data ) 
+	{
+		if ( printData ) { console.log( data ); }
+		wssConnections.forEach( function ( socket ) { socket.send( data, function ( err ) { } ); } );
 	} );
 
-
-	stdin.on( "data", function ( key ) {
-
+	stdin.on( "data", function ( key ) 
+	{
 		if ( key === '\u0003' ) {
-
 			process.exit();
-
 		}
 
 		if ( key === 'd' ) {
-
 			printData = ! printData;
-
 			if ( printData ) {
-
 				console.log( "Start printing data..." );
-
 			} else {
-
 				console.log( "Stop printing data... (Still streaming data to WebSocket)" );
-
 			}
-
 		}
 
 		serialPort.write( key );

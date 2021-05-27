@@ -53,7 +53,7 @@ var Camera = function(position, yaw, fovy)
 
 	this.update = function()
 	{
-		this.viewMatrix = this.computeViewMatrix()
+		this.viewMatrix = this.computeViewMatrix().premultiply(imuRotation)
 		this.projectionMatrix = this.computeProjectionMatrix(this.aspect)
 		this.camera.matrixWorld.copy(this.viewMatrix).invert();
 		this.world2Cam = new THREE.Matrix3().setFromMatrix4(this.viewMatrix).transpose()
@@ -130,6 +130,12 @@ var Camera = function(position, yaw, fovy)
 	document.addEventListener("mousemove", (e) => this.onMove(e));
 	this.onMove = function(e)
 	{
+		if (!useMouse) 
+		{
+			this.rpitch = 0
+			this.ryaw = 0
+			return
+		}
 		var offsetX = e.pageX - this.cursorPos.x
 		var offsetY = this.cursorPos.y - e.pageY
 		this.cursorPos.set(e.pageX, e.pageY);
@@ -164,9 +170,12 @@ var Camera = function(position, yaw, fovy)
 	}
 
 	var socket = null;
-	this.imuQuaternion = new THREE.Quaternion()
+	var imuQuaternion = new THREE.Quaternion()
+	var imuRotation = new THREE.Matrix4()
+	var useMouse = true
+	var self = this
 
-	this.initWebSocket = function() 
+	function initWebSocket()
 	{
 		if ( socket && socket.readyState == 1 ) { return; }
 		console.log( 'connecting' );
@@ -176,7 +185,7 @@ var Camera = function(position, yaw, fovy)
 			var openMsg = "WebSocket is opened.";
 			socket.send( openMsg );
 			console.log( openMsg );
-			// this.state.connectionMsg = "Connected!";
+			useMouse = false
 		};
 
 		socket.onclose = function () 
@@ -184,23 +193,29 @@ var Camera = function(position, yaw, fovy)
 			var closeMsg = "WebSocket is closed.";
 			socket.send( closeMsg );
 			console.log( closeMsg );
-			// _this.state.connectionMsg = "Lost...";
 			socket = null;
+			useMouse = true
+			imuRotation = new THREE.Matrix4()
 			setTimeout( initWebSocket, 1000 );
 		};
 
-		socket.onmessage = function ( imu ) 
+		socket.onmessage = function (imu) 
 		{
 			var data = imu.data.replace( /"/g, "" ).split( " " );
 			if ( data[ 0 ] == "QC" ) 
 			{
 				// data: QC q[0] q[1] q[2] q[3]
-				this.imuQuaternion.set(Number(data[2]), Number(data[3]), Number(data[4]), Number(data[1])).normalize();
+				imuQuaternion.set(Number(data[2]), Number(data[3]), Number(data[4]), Number(data[1])).normalize();
+				var q = imuQuaternion;
+				var qview = new THREE.Quaternion(q.x,-q.y,q.z,q.w);
+				imuRotation = new THREE.Matrix4().makeRotationFromQuaternion(qview);
+				// console.log(imuQuaternion.x, imuQuaternion.y, imuQuaternion.z, imuQuaternion.w)
 			}
 
 		};
 	}
-	this.initWebSocket();
+	initWebSocket();
+
 
 }
 
