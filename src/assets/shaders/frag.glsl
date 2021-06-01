@@ -28,7 +28,7 @@ varying vec3 vs_normal;
 
 vec3 calculateAmbient(Material material)
 {
-	float weight = 0.1;
+	float weight = 0.01;
 	return vec3(weight*material.Ka.r, weight*material.Ka.g, weight*material.Ka.b);
 }
 
@@ -56,6 +56,6 @@ void main()
 	vec3 diffuseFinal = calculateDiffuse(material, vs_position, vs_normal, pointLights[0]);
 	vec3 specularFinal = calculateSpecular(material, vs_position, vs_normal, pointLights[0], cameraPos);
 	vec4 tex = texture2D(map, vs_texcoord);
-	gl_FragColor = tex + vec4(diffuseFinal, 1.0) + vec4(specularFinal, 1.0);
+	gl_FragColor = tex + vec4(ambientFinal, 1.0) + vec4(diffuseFinal, 1.0) + vec4(specularFinal, 1.0);
 	gl_FragColor.a = material.d;
 }

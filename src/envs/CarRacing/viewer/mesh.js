@@ -56,7 +56,7 @@ var Tile = function(xl1, yl1, xr1, yr1, xl2, yl2, xr2, yr2, z, color, texture, u
 		1, 2, 3
 	];
 	this.geometry = getGeometry(positions, normals, uvs, indices)
-	this.material = new Material("Tile", color)
+	this.material = new Material("Tile", color.clone().multiplyScalar(100))
 	this.texture = texture
 }
 
@@ -116,7 +116,7 @@ var TrackRoad = function(boundaries, color, texture)
 		numvertices += segment.geometry.attributes.position.count
 	}
 	this.geometry = getGeometry(positions, normals, uvs, indices)
-	this.material = new Material("TrackRoad", color)
+	this.material = new Material("TrackRoad", color.clone().multiplyScalar(100))
 	this.texture = texture
 }
 

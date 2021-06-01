@@ -17,6 +17,7 @@ var Viewer = function(lanes)
 {
 	const webglRenderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, stencil: false, alpha: true});
 	webglRenderer.setSize(window.innerWidth, window.innerHeight);
+	webglRenderer.setClearColor(0x000000);
 
 	const camera = new Camera(new THREE.Vector3(0,10,10))
 
@@ -28,7 +29,9 @@ var Viewer = function(lanes)
 	const roadtex = new Texture("/textures/lanegrey.png")
 	
 	const road = new Model(shader).loadMeshes([new TrackRoad(lanes, NO_COLOR, roadtex)])
+	// const road = new Model(shader).loadMeshes([new TrackRoad(lanes, ROAD_COLOR.clone())])
 	const grasses = new Model(shader).loadMeshes([new TrackPlane(lanes, NO_COLOR, grasstex, new THREE.Vector4(0,75,0,75))])
+	// const grasses = new Model(shader).loadMeshes([new TrackPlane(lanes, GRASS_COLOR.clone())])
 	const sky = new Model(shader).loadMeshes([new SkySphere(skytex, 2000)])
 	const car = new Model(shader, new THREE.Vector3(0,0,-5), new THREE.Vector3(0,0,0), 0.8).loadOBJ("/models/supra1.obj")
 	// const car = new Model(shader, new THREE.Vector3(0,1,-5), new THREE.Vector3(0,0,0), 2.0).loadOBJ("/models/cube.obj")
